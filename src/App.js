@@ -12,10 +12,12 @@ class App extends Component {
     .then(res => res.json())
     .then((data) => {
       this.setState({ contacts: data })
+      console.log(data);
     })
     .catch(console.log)
   }
   render() {
+    
     return (
       <Contacts contacts={this.state.contacts} />
     )
