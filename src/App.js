@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import Contacts from './contacts';
+import Missions from './Missions';
 import {gridComponent} from '@syncfusion/ej2-react-grids';
 
 class App extends Component {
@@ -9,7 +9,7 @@ class App extends Component {
   render() {
     
     return (
-      <Contacts />
+      <Missions />
     )
   }
   

@@ -7,7 +7,7 @@ import { SetFilterModule } from '@ag-grid-enterprise/set-filter';
 import { MenuModule } from '@ag-grid-enterprise/menu';
 import { ColumnsToolPanelModule } from '@ag-grid-enterprise/column-tool-panel';
 
-class Contacts extends React.Component {
+class Missions extends React.Component {
   
 
   constructor(props) {
@@ -227,5 +227,5 @@ var allowedAge = filterModel.success.filter;
 return resultOfFilter;
 
 }
- export default Contacts
+ export default Missions
 
