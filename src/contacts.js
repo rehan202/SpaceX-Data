@@ -3,6 +3,9 @@ import { AgGridReact } from 'ag-grid-react';
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-material.css';
 import { InfiniteRowModelModule } from '@ag-grid-community/infinite-row-model';
+import { SetFilterModule } from '@ag-grid-enterprise/set-filter';
+import { MenuModule } from '@ag-grid-enterprise/menu';
+import { ColumnsToolPanelModule } from '@ag-grid-enterprise/column-tool-panel';
 
 class Contacts extends React.Component {
   
@@ -11,49 +14,69 @@ class Contacts extends React.Component {
     super(props);
 
     this.state = {
-      modules: [InfiniteRowModelModule],
-      columnDefs: [{
-                 headerName: "Name", field: "name", filter: true, filterParams: {
-                  filterOptions: ['equals', 'contains', 'Not equal'],
-                  suppressAndOrCondition: true,
-                },
-                 
-                 }, {
-                 headerName: "Details", field: "details" , width:800, sortable: true, filter:true
-               },{
-                headerName: "Failures", field: "failures" , sortable: true, filter:true
-              },{
-                headerName: "Success", field: "success" , sortable: true, filter:true
+      modules: [
+        InfiniteRowModelModule,
+        SetFilterModule,
+        MenuModule,
+        ColumnsToolPanelModule,
+      ],
+      columnDefs: [
+        {
+          headerName: "Name", field: "name", sorting: true, filter: 'agTextColumnFilter',
+          filterParams: {
+            filterOptions: ['Contains'],
+            suppressAndOrCondition: true,
+          },
+         
+          
+          }, {
+          headerName: "Details", field: "details" , width:800
+        },{
+         headerName: "Failures", field: "failures" 
+       },{
+         headerName: "Success", field: "success" ,filter: 'agTextColumnFilter',
+         filterParams: {
+          filterOptions: ['equals'],
+           suppressAndOrCondition: true,
+         },
+       },
+         {
+          headerName: "Image", field: "links.patch.small" ,
+            cellRenderer: (params) => {
+                return `<img width='50' height='50' src='${params.value}'/>`;
               },
-                {
-                 headerName: "Image", field: "links.patch.small" ,
-                   cellRenderer: (params) => {
-                       return `<img width='50' height='50' src='${params.value}'/>`;
-                     },
-             }],
+      },
+      ],
       defaultColDef: {
         flex: 1,
+        minWidth: 150,
+        sortable: true,
         resizable: true,
-        minWidth: 100
+        floatingFilter: true,
       },
-
-      rowBuffer: 0,
+     
       rowSelection: 'multiple',
       rowModelType: 'infinite',
-      paginationPageSize: 10,
+      paginationPageSize: 100,
       cacheOverflowSize: 2,
-      maxConcurrentDatasourceRequests: 1,
-      infiniteInitialRowCount: 10,
-      maxBlocksInCache: 10,
+      maxConcurrentDatasourceRequests: 2,
+      infiniteInitialRowCount: 1,
+      maxBlocksInCache: 2,
+      getRowNodeId: function(item) {
+        return item.id;
+      },
     };
   }
-  
+
   onGridReady = params => {
     this.gridApi = params.api;
     this.gridColumnApi = params.columnApi;
 
     const httpRequest = new XMLHttpRequest();
     const updateData = data => {
+      data.forEach(function(data, index) {
+        data.id = 'R' + (index + 1);
+      });
       var dataSource = {
         rowCount: null,
         getRows: function(params) {
@@ -64,10 +87,13 @@ class Contacts extends React.Component {
               params.sortModel,
               params.filterModel
             );
-            var rowsThisPage = data.slice(params.startRow, params.endRow);
+            var rowsThisPage = dataAfterSortingAndFiltering.slice(
+              params.startRow,
+              params.endRow
+            );
             var lastRow = -1;
-            if (data.length <= params.endRow) {
-              lastRow = data.length;
+            if (dataAfterSortingAndFiltering.length <= params.endRow) {
+              lastRow = dataAfterSortingAndFiltering.length;
             }
             params.successCallback(rowsThisPage, lastRow);
           }, 500);
@@ -87,12 +113,11 @@ class Contacts extends React.Component {
       }
     };
   };
-  
-  
+
   render() {
     return (
       <div>
-        <center><h1>SpaceX Missions</h1></center>
+           <center><h1>SpaceX Missions</h1></center>
         <div
           id="myGrid"
           style={{
@@ -105,8 +130,6 @@ class Contacts extends React.Component {
             modules={this.state.modules}
             columnDefs={this.state.columnDefs}
             defaultColDef={this.state.defaultColDef}
-            components={this.state.components}
-            rowBuffer={this.state.rowBuffer}
             rowSelection={this.state.rowSelection}
             rowDeselection={true}
             rowModelType={this.state.rowModelType}
@@ -117,6 +140,8 @@ class Contacts extends React.Component {
             }
             infiniteInitialRowCount={this.state.infiniteInitialRowCount}
             maxBlocksInCache={this.state.maxBlocksInCache}
+            getRowNodeId={this.state.getRowNodeId}
+            components={this.state.components}
             onGridReady={this.onGridReady}
           />
         </div>
@@ -125,48 +150,7 @@ class Contacts extends React.Component {
   }
 }
 
- 
 
-//2nd
-
-
-// const Contacts = ({ contacts }) => {
- 
-//   columnDefs: [{
-//     headerName: "Make", field: "make"
-//   }, {
-//     headerName: "Model", field: "model"
-//   }, {
-//     headerName: "Price", field: "price"
-//   }];
-//   rowData: [{
-//     make: "Toyota", model: "Celica", price: 35000
-//   }, {
-//     make: "Ford", model: "Mondeo", price: 32000
-//   }, {
-//     make: "Porsche", model: "Boxter", price: 72000
-//   }]
-//   return (
-//     <div>
-
-//       <center><h1>SpaceX Missions</h1></center>
-    
-      
-		
-		
-// 		 {contacts.map((contact) => (
-//        <div
-//        className="ag-theme-material"
-//        style={{
-//        height: '250px',
-//        width: '600px' }}
-//      >
-//        <AgGridReact
-//          columnDefs={columnDefs}
-//          rowData={rowData}>
-//        </AgGridReact>
-//      </div>
-      
 function sortAndFilter(allOfTheData, sortModel, filterModel) {
   return sortData(sortModel, filterData(filterModel, allOfTheData));
 }
@@ -194,7 +178,7 @@ function sortData(sortModel, data) {
     return 0;
   });
   return resultOfSort;
-};
+}
 function filterData(filterModel, data) {
   var filterPresent = filterModel && Object.keys(filterModel).length > 0;
   if (!filterPresent) {
@@ -203,36 +187,45 @@ function filterData(filterModel, data) {
   var resultOfFilter = [];
   for (var i = 0; i < data.length; i++) {
     var item = data[i];
-    if (filterModel.age) {
-      var age = item.age;
-      var allowedAge = parseInt(filterModel.age.filter);
-      if (filterModel.age.type == 'equals') {
-        if (age !== allowedAge) {
-          continue;
-        }
-      } else if (filterModel.age.type == 'lessThan') {
-        if (age >= allowedAge) {
-          continue;
-        }
-      } else {
-        if (age <= allowedAge) {
-          continue;
-        }
-      }
+    if (filterModel.name) {
+      var name = item.name;
+      console.log(name);
+      
+
+      var allowedAge = filterModel.name;
+      console.log(filterModel.name.type);
+    
+     if(filterModel.name.type === 'Contains')
+    {
+      if (name.toLowerCase().indexOf(allowedAge.filter.toLowerCase()) >= 0) {
+        resultOfFilter.push(item);
+    console.log("Contains");
+              continue;
     }
-    if (filterModel.year) {
-      if (filterModel.year.values.indexOf(item.year.toString()) < 0) {
-        continue;
-      }
-    }
-    if (filterModel.country) {
-      if (filterModel.country.values.indexOf(item.country) < 0) {
-        continue;
-      }
-    }
-    resultOfFilter.push(item);
   }
-  return resultOfFilter;
 }
-  export default Contacts
+if(filterModel.success)
+{
+var success = item.success;
+var allowedAge = filterModel.success.filter;
+  if (filterModel.success.filter ==='true' && success === true) 
+  {
+  
+    resultOfFilter.push(item);
+    continue;
+  }
+    
+     if (filterModel.success.filter === 'false' && success === false)
+  {
+      
+    resultOfFilter.push(item);
+    console.log("false");
+    continue;
+  }
+}
+}
+return resultOfFilter;
+
+}
+ export default Contacts
 
